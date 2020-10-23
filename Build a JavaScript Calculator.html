@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="#" />
+    <title>Build a Javascript Calculator</title>
+
+    <!-- REACT -->
+    <script src="https://unpkg.com/react@16.12.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.12.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.8.3/babel.js"></script>
+    <!--GOOGLE FONTS-->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="//db.onlinewebfonts.com/c/1b40984d7a10bcae004877dc48f4cc8f?family=Digital" rel="stylesheet" type="text/css"/> 
+    <!-- CSS -->
+    <style>
+
+        :root {
+        --fontColor: #d2dae2;
+        --borderColor: #d2dae2;
+        --backgroundColor: #1e272e;
+        }
+
+        body{
+            margin-top: 100px;
+            font-family: 'Roboto Mono', monospace;
+
+            background-color: var(--backgroundColor);
+            color: var(--fontColor);
+            
+            
+        }
+        .container{
+            border: 4px solid var(--borderColor);
+            margin: auto;
+            width: 50vw;
+            height: 50vh;
+            padding: 5px;
+            
+            
+            display: grid;
+            grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr 0.5fr;
+            grid-template-areas: 
+                
+                'memory memory memory memory'
+                'display display display display'
+                'clear clear divide multiply'
+                'seven eight nine subtract'
+                'four five six add'
+                'one two three equals'
+                'zero zero decimal equals';
+            grid-gap: 1px;
+        }
+        
+        #zero{grid-area: zero;}
+        #one{grid-area: one;}
+        #two{grid-area: two;}
+        #three{grid-area: three;}
+        #four{grid-area: four;}
+        #five{grid-area: five;}
+        #six{grid-area: six;}
+        #seven{grid-area: seven;}
+        #eight{grid-area: eight;}
+        #nine{grid-area: nine;}
+        #clear{grid-area: clear;}
+        #decimal{grid-area: decimal;}
+        #add{grid-area: add;}
+        #subtract{grid-area: subtract;}
+        #divide{grid-area: divide;}
+        #multiply{grid-area: multiply;}
+        #equals{grid-area: equals;}
+        #display{
+            grid-area: display;
+            padding: 5px;
+            text-align: right;
+            place-self: end-strech;
+            /*edge does not support place self, so it has to be broken into justify self and align self*/
+            justify-self: stretch;
+            align-self: end;
+            border-bottom: 0px solid var(--borderColor);
+            font-size:x-large;
+            font-family: 'Digital', 'Roboto Mono';}
+        #memory{
+            grid-area: memory;
+            padding: 5px;
+            text-align: right;
+            place-self: end-strech;
+            /*edge does not support place self, so it has to be broken into justify self and align self*/
+            justify-self: stretch;
+            align-self: end;
+            border-bottom: 3px solid var(--borderColor);
+            color: #05c46b;
+            font-size: smaller;
+            font-family: 'Digital', 'Roboto Mono';}
+            
+        button{
+            border:3px solid var(--borderColor);
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 800;
+            background-color: #33383d;
+            color: var(--fontColor);
+        }
+        button:hover{
+            opacity: 0.75;
+        }
+        
+    </style>
+    
+</head>
+<body>
+    <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
+    <div id="root"></div>
+</body>
+</html>
+
+<script type="text/babel">
+
+    const info = [{ value: '0', id: 'zero' },
+        { value: '1', id: 'one' },
+        { value: '2', id: 'two' },
+        { value: '3', id: 'three' },
+        { value: '4', id: 'four' },
+        { value: '5', id: 'five' },
+        { value: '6', id: 'six' },
+        { value: '7', id: 'seven' },
+        { value: '8', id: 'eight' },
+        { value: '9', id: 'nine' },
+        { value: '+', id: 'add' },
+        { value: '-', id: 'subtract' },
+        { value: '*', id: 'multiply' },
+        { value: '/', id: 'divide' },
+        { value: '=', id: 'equals' },
+        { value: 'CLEAR', id: 'clear' },
+        { value: '.', id: 'decimal' }];
+
+    class App extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                input: '0',
+                memory: '',
+                operation: '',
+                lastPressed: ''
+            }
+            this.handleClick = this.handleClick.bind(this);
+            this.f_eval = this.f_eval.bind(this);
+        }
+
+        f_eval(a){
+            this.setState({
+                input: eval(a).toString(),
+                memory: eval(a).toString()
+            }
+            );
+        }
+
+        handleClick(event) {
+            const e = event.target.innerText;
+            
+            if (e === 'CLEAR'){
+                this.setState({
+                    input: '0',
+                    memory: '',
+                    operation: '',
+                    lastPressed: ''
+                });
+            }
+
+            if (e === '.'){
+                if (this.state.input === '0'){
+                    this.setState({
+                        input: '0.'
+                    });
+                }
+                if (!this.state.input.includes('.')){
+                    this.setState({
+                        input: this.state.input + e
+                    });
+                }
+
+            }
+
+            if (e.match(/[0-9]/)){
+                
+                this.setState({
+                    input: (this.state.input === '0') ? e : this.state.input + e
+                });
+                
+            }
+
+            if (e.match(/\/|\*|-|\+/)){
+
+                if (this.state.input === '0'){
+                    this.setState({
+                        input: e
+                    });
+                }
+
+                if (this.state.lastPressed === '='){
+                    this.setState({
+                        input: e
+                    });
+                }
+
+
+                
+                if (this.state.input.match(/\/|\*|-|\+/)){
+                    if (e !== '-'){
+                        this.setState({
+                            input: e
+                        });
+                    }else{
+                        this.setState({
+                            input: this.state.input + e
+                        });
+                    }
+                    
+                    
+                }
+
+
+                if (this.state.input.match(/[0-9]+[.]*[0-9]*/) && this.state.lastPressed !== '='){
+                    this.setState({
+                        input: e, 
+                        memory: this.state.memory + this.state.input
+                    });
+                }
+                
+                
+
+            }
+
+            if (e === '='){
+                this.setState({
+                    memory: this.state.memory + this.state.input
+                }, () => {this.f_eval(this.state.memory)});
+            }
+
+            
+            this.setState({
+                lastPressed: e
+            });
+            
+
+        }//handle click
+        
+
+        render() {
+            return (
+                <div className='container'>
+
+                    <div id='memory'>{this.state.memory}</div>
+                    <div id='display'>{this.state.input}</div>
+                    {info.map((data, i) => (
+                        <button id={data.id} key={i} onClick={this.handleClick}>{data.value}</button>
+                    ))}
+                    
+
+                </div>//container
+            )//return
+        }//render
+
+
+    }//App
+
+
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+</script>
